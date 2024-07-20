@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = require("ws");
 const Gamemanager_1 = require("./Gamemanager");
-const port = 8081;
+const port = 8080;
 const ws = new ws_1.WebSocketServer({ port });
 const gameManager = new Gamemanager_1.GameManager();
 ws.on('connection', function connection(ws) {
