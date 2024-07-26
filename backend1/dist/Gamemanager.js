@@ -35,6 +35,12 @@ class GameManager {
                     game.makeMove(socket, message.payload);
                 }
             }
+            if (message.type === messages_1.CHAT_MESSAGE) {
+                const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+                if (game) {
+                    game.sendChatMessage(socket, message.payload);
+                }
+            }
         });
     }
 }

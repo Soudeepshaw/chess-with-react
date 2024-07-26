@@ -22,6 +22,7 @@ class Game {
                 color: "black"
             }
         }));
+        this.sendChatMessage(this.player1, "Game started. Good luck!");
     }
     makeMove(socket, move) {
         const playerColor = (socket === this.player1) ? 'white' : 'black';
@@ -35,14 +36,15 @@ class Game {
                 console.log("Invalid move:", move);
                 return;
             }
-            if (this.board.inCheck()) {
-                this.notifyCheck();
-            }
-            if (this.board.isGameOver()) {
-                this.notifyGameOver();
-                return;
-            }
             this.sendMoveToOpponent(socket, move);
+            setTimeout(() => {
+                if (this.board.isGameOver()) {
+                    this.notifyGameOver();
+                }
+                else if (this.board.inCheck()) {
+                    this.notifyCheck();
+                }
+            }, 1000);
             this.moveCount++;
         }
         catch (err) {
@@ -90,6 +92,18 @@ class Game {
         else {
             this.player1.send(message);
         }
+    }
+    sendChatMessage(socket, message) {
+        const sender = socket === this.player1 ? "white" : "black";
+        const chatMessage = JSON.stringify({
+            type: messages_1.CHAT_MESSAGE,
+            payload: {
+                sender,
+                message
+            }
+        });
+        this.player1.send(chatMessage);
+        this.player2.send(chatMessage);
     }
 }
 exports.Game = Game;

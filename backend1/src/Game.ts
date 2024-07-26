@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 import {Chess} from 'chess.js';
-import { GAME_OVER, INIT_GAME, MOVE,CHECK } from "./messages";
+import { GAME_OVER, INIT_GAME, MOVE,CHECK , CHAT_MESSAGE} from "./messages";
 export class Game {
     public player1:WebSocket;
     public player2:WebSocket;
@@ -27,6 +27,7 @@ export class Game {
                 color:"black"
                 }
         }))
+        this.sendChatMessage(this.player1, "Game started. Good luck!");
     }
     makeMove(socket:WebSocket,move:{from:string;to:string;}){
         const playerColor = (socket === this.player1) ? 'white' : 'black';
@@ -42,16 +43,15 @@ export class Game {
             console.log("Invalid move:", move);
                 return;
         }
-        if (this.board.inCheck()) {
-            this.notifyCheck();
-        }
-
-        if (this.board.isGameOver()) {
-            this.notifyGameOver();
-            return;
-        }
 
         this.sendMoveToOpponent(socket, move);
+        setTimeout(() => {
+            if (this.board.isGameOver()) {
+                this.notifyGameOver();
+            } else if (this.board.inCheck()) {
+                this.notifyCheck();
+            }
+        }, 1000);
         this.moveCount++;
     } catch (err) {
         console.log("Error making move:", err);
@@ -99,4 +99,18 @@ sendMoveToOpponent(socket: WebSocket, move: { from: string; to: string }) {
         this.player1.send(message);
     }
 }
+sendChatMessage(socket: WebSocket, message: string) {
+    const sender = socket === this.player1 ? "white" : "black";
+    const chatMessage = JSON.stringify({
+        type: CHAT_MESSAGE,
+        payload: {
+            sender,
+            message
+        }
+    });
+
+    this.player1.send(chatMessage);
+    this.player2.send(chatMessage);
+}
+
 }
