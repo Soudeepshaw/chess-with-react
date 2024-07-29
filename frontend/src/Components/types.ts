@@ -1,4 +1,4 @@
-import { Chess, Square, Piece as ChessPiece } from 'chess.js';
+import { Square, Piece as ChessPiece } from 'chess.js';
 
 export type Board = (ChessPiece | null)[][];
 
