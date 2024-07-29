@@ -13,8 +13,19 @@ class GameManager {
         this.users.push(socket);
         this.addHandler(socket);
     }
+    getGameByPlayer(socket) {
+        return this.games.find(game => game.player1 === socket || game.player2 === socket);
+    }
     removeUser(socket) {
         this.users = this.users.filter(user => user !== socket);
+        const game = this.getGameByPlayer(socket);
+        if (game) {
+            game.handlePlayerLeft(socket);
+            this.games = this.games.filter(g => g !== game);
+        }
+        if (this.pendingUsers === socket) {
+            this.pendingUsers = null;
+        }
     }
     addHandler(socket) {
         socket.on('message', (data) => {

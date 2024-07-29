@@ -10,6 +10,10 @@ ws.on('connection', function connection(ws) {
     gameManager.addUser(ws);
     ws.on("close", () => {
         console.log("Client disconnected");
+        const game = gameManager.getGameByPlayer(ws);
+        if (game) {
+            game.handlePlayerLeft(ws);
+        }
         gameManager.removeUser(ws);
     });
 });

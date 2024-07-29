@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 import {Chess} from 'chess.js';
-import { GAME_OVER, INIT_GAME, MOVE,CHECK , CHAT_MESSAGE} from "./messages";
+import { GAME_OVER, INIT_GAME, MOVE,CHECK , CHAT_MESSAGE,PLAYER_LEFT} from "./messages";
 export class Game {
     public player1:WebSocket;
     public player2:WebSocket;
@@ -47,7 +47,8 @@ export class Game {
         this.sendMoveToOpponent(socket, move);
         setTimeout(() => {
             if (this.board.isGameOver()) {
-                this.notifyGameOver();
+                const winner = this.board.turn() === "w" ? "black" : "white";
+                this.notifyGameOver(winner);
             } else if (this.board.inCheck()) {
                 this.notifyCheck();
             }
@@ -72,20 +73,30 @@ notifyCheck() {
         }
     }));
 }
-notifyGameOver() {
-    const winner = this.board.turn() === "w" ? "black" : "white";
-    this.player1.send(JSON.stringify({
-        type: GAME_OVER,
+handlePlayerLeft(socket: WebSocket) {
+    const winner = socket === this.player1 ? "black" : "white";
+    const remainingPlayer = socket === this.player1 ? this.player2 : this.player1;
+
+    remainingPlayer.send(JSON.stringify({
+        type: PLAYER_LEFT,
         payload: {
             winner
         }
     }));
-    this.player2.send(JSON.stringify({
+
+    this.notifyGameOver(winner);
+}
+
+notifyGameOver(winner: string) {
+    const gameOverMessage = JSON.stringify({
         type: GAME_OVER,
         payload: {
             winner
         }
-    }));
+    });
+
+    this.player1.send(gameOverMessage);
+    this.player2.send(gameOverMessage);
 }
 sendMoveToOpponent(socket: WebSocket, move: { from: string; to: string }) {
     const message = JSON.stringify({

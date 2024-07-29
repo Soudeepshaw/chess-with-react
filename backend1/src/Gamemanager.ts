@@ -14,8 +14,19 @@ export class GameManager{
         this.users.push(socket);
         this.addHandler(socket)
     }
+    getGameByPlayer(socket: WebSocket): Game | undefined {
+        return this.games.find(game => game.player1 === socket || game.player2 === socket);
+    }
     removeUser(socket:WebSocket){
         this.users=this.users.filter(user =>user !==socket)
+        const game = this.getGameByPlayer(socket);
+        if (game) {
+            game.handlePlayerLeft(socket);
+            this.games = this.games.filter(g => g !== game);
+        }
+        if (this.pendingUsers === socket) {
+            this.pendingUsers = null;
+        }
         
     }
     private addHandler(socket:WebSocket){

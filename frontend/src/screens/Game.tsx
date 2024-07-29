@@ -4,7 +4,7 @@ import { minimaxRoot } from '../Components/Ai';
 import { useSocket } from "../Hooks/Usesocket";
 import { useEffect, useState, useCallback } from "react";
 import { Chess, Square } from "chess.js";
-import { GAME_OVER, INIT_GAME, MOVE } from "../MESSAGES/Messages";
+import { GAME_OVER, INIT_GAME, MOVE,PLAYER_LEFT } from "../MESSAGES/Messages";
 import ChatComponent from '../Components/ChatComponent'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -90,6 +90,17 @@ export const Game = () => {
                 break;
             case 'CHAT_MESSAGE':
                 setChatMessages(prevMessages => [...prevMessages, { sender: message.payload.sender, text: message.payload.message }]);
+                break;
+            case PLAYER_LEFT:
+                toast.warning("Opponent has left the game.");
+                setWinner(color === 'white' ? 'White' : 'Black');
+                setGameStarted(false);
+                setShowWinnerAnimation(true);
+                confetti({
+                   particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
                 break;
         }
     }, [chess, playingAgainstAI]);
@@ -192,16 +203,7 @@ export const Game = () => {
     };
 
     const resetGame = () => {
-        setGameStarted(false);
-        setColor(null);
-        setWinner(null);
-        setSearchingPlayer(false);
-        setPlayingAgainstAI(false);
-        setMoves([]);
-        setShowWinnerAnimation(false);
-        const newGame = new Chess();
-        setChess(newGame);
-        setBoard(newGame.board());
+        window.location.reload();
     };
 
     if (!socket) return <div>Connecting....</div>;

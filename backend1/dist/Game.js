@@ -39,7 +39,8 @@ class Game {
             this.sendMoveToOpponent(socket, move);
             setTimeout(() => {
                 if (this.board.isGameOver()) {
-                    this.notifyGameOver();
+                    const winner = this.board.turn() === "w" ? "black" : "white";
+                    this.notifyGameOver(winner);
                 }
                 else if (this.board.inCheck()) {
                     this.notifyCheck();
@@ -66,20 +67,26 @@ class Game {
             }
         }));
     }
-    notifyGameOver() {
-        const winner = this.board.turn() === "w" ? "black" : "white";
-        this.player1.send(JSON.stringify({
-            type: messages_1.GAME_OVER,
+    handlePlayerLeft(socket) {
+        const winner = socket === this.player1 ? "black" : "white";
+        const remainingPlayer = socket === this.player1 ? this.player2 : this.player1;
+        remainingPlayer.send(JSON.stringify({
+            type: messages_1.PLAYER_LEFT,
             payload: {
                 winner
             }
         }));
-        this.player2.send(JSON.stringify({
+        this.notifyGameOver(winner);
+    }
+    notifyGameOver(winner) {
+        const gameOverMessage = JSON.stringify({
             type: messages_1.GAME_OVER,
             payload: {
                 winner
             }
-        }));
+        });
+        this.player1.send(gameOverMessage);
+        this.player2.send(gameOverMessage);
     }
     sendMoveToOpponent(socket, move) {
         const message = JSON.stringify({
