@@ -82,14 +82,14 @@ export class AI {
   }
 
   private getAbsoluteValue(piece: Piece, isWhite: boolean, x: number, y: number): number {
-    switch (piece.type) {
+    switch (piece?.type) {
       case 'p': return 10 + (isWhite ? this.pawnEvalWhite[y][x] : this.pawnEvalBlack[y][x]);
       case 'r': return 50 + (isWhite ? this.rookEvalWhite[y][x] : this.rookEvalBlack[y][x]);
       case 'n': return 30 + this.knightEval[y][x];
       case 'b': return 30 + (isWhite ? this.bishopEvalWhite[y][x] : this.bishopEvalBlack[y][x]);
       case 'q': return 90 + this.evalQueen[y][x];
       case 'k': return 900 + (isWhite ? this.kingEvalWhite[y][x] : this.kingEvalBlack[y][x]);
-      default: throw new Error("Unknown piece type: " + piece.type);
+      default: throw new Error("Unknown piece type: " + piece?.type);
     }
   }
 
@@ -178,7 +178,7 @@ export class AI {
   }
 }
 
-export const minimaxRoot = (depth: number, game: Chess, isMaximisingPlayer: boolean): string => {
+export const minimaxRoot = (depth: number, game: Chess, _isMaximisingPlayer: boolean): string => {
   const ai = new AI(game);
   return ai.minimaxRoot(depth);
 };
